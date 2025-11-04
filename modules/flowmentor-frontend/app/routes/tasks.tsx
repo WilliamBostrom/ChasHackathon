@@ -80,6 +80,19 @@ export default function TasksPage() {
       console.log("🔄 Reloading tasks...");
       await loadTasks();
 
+      // Regenerate plan so dashboard schedule reflects the new task immediately
+      try {
+        await apiMethods.generateDayPlan(today);
+      } catch (err) {
+        console.warn("Failed to regenerate plan after add:", err);
+      }
+
+      // Notify other routes (dashboard calendar) to refresh
+      try {
+        window.dispatchEvent(new Event("tasks-updated"));
+        localStorage.setItem("tasks:updated", String(Date.now()));
+      } catch {}
+
       setNewTask({
         type: "todo",
         title: "",
@@ -106,6 +119,20 @@ export default function TasksPage() {
         completed: !task.completed,
       });
       await loadTasks();
+
+      // Regenerate plan so dashboard schedule updates instantly
+      try {
+        const today = new Date().toISOString().split("T")[0];
+        await apiMethods.generateDayPlan(today);
+      } catch (err) {
+        console.warn("Failed to regenerate plan after toggle:", err);
+      }
+
+      // Notify dashboard to refresh
+      try {
+        window.dispatchEvent(new Event("tasks-updated"));
+        localStorage.setItem("tasks:updated", String(Date.now()));
+      } catch {}
     } catch (error) {
       console.error("Failed to update task:", error);
     }
@@ -115,6 +142,20 @@ export default function TasksPage() {
     try {
       await apiMethods.deleteTask(taskId);
       await loadTasks();
+
+      // Regenerate plan so dashboard schedule updates instantly
+      try {
+        const today = new Date().toISOString().split("T")[0];
+        await apiMethods.generateDayPlan(today);
+      } catch (err) {
+        console.warn("Failed to regenerate plan after delete:", err);
+      }
+
+      // Notify dashboard to refresh
+      try {
+        window.dispatchEvent(new Event("tasks-updated"));
+        localStorage.setItem("tasks:updated", String(Date.now()));
+      } catch {}
     } catch (error) {
       console.error("Failed to delete task:", error);
     }

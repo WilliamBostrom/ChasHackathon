@@ -118,6 +118,28 @@ export default function DashboardPage() {
     loadCalendarEvents();
   }, [currentDate]);
 
+  // Listen for updates dispatched from other routes (tasks page)
+  useEffect(() => {
+    const onCustom = () => {
+      loadTodayData();
+      loadCalendarEvents();
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "tasks:updated") onCustom();
+    };
+    window.addEventListener("tasks-updated", onCustom as EventListener);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("tasks-updated", onCustom as EventListener);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, []);
+
+  // Recompute calendar whenever tasks or plan change
+  useEffect(() => {
+    loadCalendarEvents();
+  }, [tasks, plan]);
+
   const loadTodayData = async () => {
     try {
       const today = new Date().toISOString().split("T")[0];
@@ -139,49 +161,73 @@ export default function DashboardPage() {
   };
 
   const loadCalendarEvents = async () => {
-    // In a real app, this would fetch events for the month
-    // For now, we'll construct events from tasks and plan
-    const start = startOfMonth(currentDate);
-    const end = endOfMonth(currentDate);
+    const addMinutes = (timeStr: string, minutes: number): string => {
+      if (!timeStr) return timeStr;
+      const [h, m] = timeStr.split(":").map((v) => parseInt(v, 10));
+      const total = (h * 60 + m + (minutes || 0) + 24 * 60) % (24 * 60);
+      const hh = String(Math.floor(total / 60)).padStart(2, "0");
+      const mm = String(total % 60).padStart(2, "0");
+      return `${hh}:${mm}`;
+    };
 
     const eventsMap = new Map<string, CalendarEvent[]>();
 
-    // Add today's tasks to calendar
-    tasks.forEach((task) => {
-      const dateKey = format(new Date(), "yyyy-MM-dd");
-      const event: CalendarEvent = {
-        id: task.id,
-        title: task.title,
-        startTime: task.time || "09:00",
-        endTime: task.time || "10:00",
-        date: dateKey,
-        type: task.type === "meeting" ? "meeting" : "task",
-        completed: task.completed,
-        source: "manual",
-      };
+    // Build tasks for the whole month
+    const start = startOfMonth(currentDate);
+    const end = endOfMonth(currentDate);
+    const days = eachDayOfInterval({ start, end });
 
-      const dayEvents = eventsMap.get(dateKey) || [];
-      dayEvents.push(event);
-      eventsMap.set(dateKey, dayEvents);
+    const monthlyTasks = await Promise.all(
+      days.map(async (day) => {
+        const dateKey = format(day, "yyyy-MM-dd");
+        try {
+          const dayTasks = await apiMethods.getTasks(dateKey);
+          return { dateKey, tasks: dayTasks as Task[] };
+        } catch {
+          return { dateKey, tasks: [] as Task[] };
+        }
+      })
+    );
+
+    monthlyTasks.forEach(({ dateKey, tasks: dayTasks }) => {
+      dayTasks.forEach((task) => {
+        const event: CalendarEvent = {
+          id: task.id,
+          title: task.title,
+          startTime: task.time || "09:00",
+          endTime:
+            task.time && task.duration
+              ? addMinutes(task.time, Number(task.duration))
+              : task.time
+                ? addMinutes(task.time, 60)
+                : "10:00",
+          date: dateKey,
+          type: task.type === "meeting" ? "meeting" : "task",
+          completed: task.completed,
+          source: "manual",
+        };
+        const dayEvents = eventsMap.get(dateKey) || [];
+        dayEvents.push(event);
+        eventsMap.set(dateKey, dayEvents);
+      });
     });
 
-    // Add plan blocks to calendar
+    // Also include today's plan blocks (optional)
     if (plan) {
+      const todayKey = format(new Date(), "yyyy-MM-dd");
       plan.blocks.forEach((block) => {
-        const dateKey = format(new Date(), "yyyy-MM-dd");
         const event: CalendarEvent = {
           id: block.id,
           title: block.title,
           startTime: block.startTime,
           endTime: block.endTime,
-          date: dateKey,
+          date: todayKey,
           type: block.type === "focus" ? "focus" : "routine",
           source: "manual",
         };
-
-        const dayEvents = eventsMap.get(dateKey) || [];
+        const dayEvents = eventsMap.get(todayKey) || [];
         dayEvents.push(event);
-        eventsMap.set(dateKey, dayEvents);
+        eventsMap.set(todayKey, dayEvents);
       });
     }
 
