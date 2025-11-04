@@ -1,8 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer
-from typing import Annotated, AsyncGenerator
+from typing import Annotated
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..utils import auth, log
 from .. import conf
@@ -68,33 +67,6 @@ RequestPrincipal = Annotated[PrincipalInfo, Depends(get_request_principal)]
 #     return principal
 #
 # UserRequestPrincipal = Annotated[PrincipalInfo, Depends(get_user_request_principal)]
-
-#### Database ####
-
-
-async def get_db_session(request: Request) -> AsyncGenerator[AsyncSession, None]:
-    """
-    FastAPI dependency that provides an AsyncSession for database operations.
-
-    Usage in routes:
-        from .utils import DBSession
-
-        @router.post("/users")
-        async def create_user(user: User, session: DBSession):
-            return await create_user(session, user)
-    """
-    if not conf.USE_POSTGRES:
-        raise HTTPException(status_code=503, detail="PostgreSQL is not configured")
-
-    postgres_client = request.app.state.postgres_client
-
-    async with postgres_client.get_session() as session:
-        yield session
-
-
-# Type alias for dependency injection
-DBSession = Annotated[AsyncSession, Depends(get_db_session)]
-
 
 #### Couchbase ####
 

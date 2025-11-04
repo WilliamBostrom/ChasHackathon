@@ -5,7 +5,6 @@ include:
   - modules/couchbase
   - modules/flowmentor-frontend
   - modules/temporal
-  - modules/postgres
 tools:
   default:
     run:
@@ -14,4 +13,3 @@ tools:
       - tool: "flowmentor-frontend"
       - tool: "temporal"
       - tool: "temporal-ui"
-      - tool: "postgres"

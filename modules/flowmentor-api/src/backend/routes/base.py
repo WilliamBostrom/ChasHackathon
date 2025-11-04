@@ -24,7 +24,6 @@ from ..models import (
     SuccessResponse,
 )
 # from .utils import RequestPrincipal # NOTE: uncomment to use auth
-# from .utils import DBSession # NOTE: uncomment to use postgres
 
 logger = log.get_logger(__name__)
 router = APIRouter()
@@ -163,7 +162,7 @@ async def health_check(
     quick: bool = Query(False, description="Return basic status only"),
     services: Optional[str] = Query(
         None,
-        description="Comma-separated list of services to check (postgres,couchbase,temporal,twilio)",
+        description="Comma-separated list of services to check (couchbase,temporal,twilio)",
     ),
     timeout: float = Query(
         2.0, description="Timeout in seconds for health checks", ge=0.1, le=10.0
@@ -184,7 +183,6 @@ async def health_check(
             "version": get_app_version(),
             "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
             "features": {
-                "postgres": conf.USE_POSTGRES,
                 "twilio": conf.USE_TWILIO,
                 "auth": conf.USE_AUTH,
             },
@@ -218,20 +216,6 @@ async def _check_all_services(
     request: Request, health_status: dict, services_filter: Optional[List[str]]
 ):
     """Check all enabled services with proper error handling."""
-
-    # Check PostgreSQL if requested
-    if not services_filter or "postgres" in services_filter:
-        if conf.USE_POSTGRES:
-            postgres_client = request.app.state.postgres_client
-            db_health = postgres_client.health_check()
-            health_status["postgres"] = db_health
-            if not db_health.get("connected", False):
-                health_status["status"] = "degraded"
-        else:
-            health_status["postgres"] = {
-                "status": "disabled",
-                "message": "PostgreSQL is disabled (USE_POSTGRES=False)",
-            }
 
     # Check Couchbase if requested
     if not services_filter or "couchbase" in services_filter:
