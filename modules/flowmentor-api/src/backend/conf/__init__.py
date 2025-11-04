@@ -17,7 +17,7 @@ USE_POSTGRES = False
 USE_TWILIO = False
 
 # Set to True to enable Couchbase
-USE_COUCHBASE = True
+USE_COUCHBASE = False
 
 #### Types ####
 

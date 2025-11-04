@@ -60,6 +60,103 @@ async def root():
     return {"message": "Hello World"}
 
 
+# ============================================================================
+# Frontend API Stub Endpoints (temporary - no Couchbase required)
+# ============================================================================
+
+@router.get("/tasks")
+async def get_tasks_stub(date: str = Query(...)):
+    """Stub endpoint for tasks - returns empty array."""
+    return []
+
+
+@router.post("/tasks")
+async def create_task_stub(task: dict):
+    """Stub endpoint for creating tasks."""
+    return {"id": "stub-task-id", **task}
+
+
+@router.patch("/tasks/{task_id}")
+async def update_task_stub(task_id: str, updates: dict):
+    """Stub endpoint for updating tasks."""
+    return {"id": task_id, **updates}
+
+
+@router.delete("/tasks/{task_id}")
+async def delete_task_stub(task_id: str):
+    """Stub endpoint for deleting tasks."""
+    return {"success": True}
+
+
+@router.post("/morning-checkin")
+async def morning_checkin_stub(data: dict):
+    """Stub endpoint for morning check-in."""
+    return {"success": True, "data": data}
+
+
+@router.post("/generate-plan")
+async def generate_plan_stub(data: dict):
+    """Stub endpoint for generating day plan."""
+    return {
+        "date": data.get("date"),
+        "blocks": [],
+        "morningRoutine": [],
+        "eveningRoutine": []
+    }
+
+
+@router.get("/plan")
+async def get_plan_stub(date: str = Query(...)):
+    """Stub endpoint for getting day plan."""
+    return {
+        "date": date,
+        "blocks": [],
+        "morningRoutine": [],
+        "eveningRoutine": []
+    }
+
+
+@router.post("/focus/{block_id}/start")
+async def start_focus_stub(block_id: str):
+    """Stub endpoint for starting focus block."""
+    return {"success": True, "blockId": block_id}
+
+
+@router.post("/focus/{block_id}/feedback")
+async def focus_feedback_stub(block_id: str, feedback: dict):
+    """Stub endpoint for focus feedback."""
+    return {"success": True}
+
+
+@router.post("/afternoon-reflection")
+async def afternoon_reflection_stub(data: dict):
+    """Stub endpoint for afternoon reflection."""
+    return {"success": True, "data": data}
+
+
+@router.get("/ai-summary")
+async def ai_summary_stub(date: str = Query(...)):
+    """Stub endpoint for AI summary."""
+    return {"summary": "No data available yet", "date": date}
+
+
+@router.get("/weekly-summary")
+async def weekly_summary_stub(week: int = Query(...)):
+    """Stub endpoint for weekly summary."""
+    return {
+        "weekNumber": week,
+        "suggestedGoals": [],
+        "insights": "No data available yet",
+        "completionRate": 0
+    }
+
+
+@router.post("/micro-goal/select")
+async def select_goal_stub(data: dict):
+    """Stub endpoint for selecting micro goal."""
+    return {"success": True}
+
+
 @router.get("/health")
 async def health_check(
     request: Request,

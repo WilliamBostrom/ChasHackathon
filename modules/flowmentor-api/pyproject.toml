@@ -26,4 +26,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.uv.sources]
-temporal-client = { path = "../lib/py/temporal-client", editable = true }
+temporal-client = { path = "../../lib/py/temporal-client", editable = true }
