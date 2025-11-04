@@ -7,6 +7,7 @@ import {
   Target,
   Moon,
   TrendingUp,
+  LayoutDashboard,
 } from "lucide-react";
 
 export default function Header() {
@@ -14,6 +15,11 @@ export default function Header() {
 
   const navItems = [
     { path: "/", label: "Home", icon: <Home className="h-4 w-4" /> },
+    {
+      path: "/dashboard",
+      label: "Dashboard",
+      icon: <LayoutDashboard className="h-4 w-4" />,
+    },
     {
       path: "/morning",
       label: "Morning",
