@@ -1,7 +1,8 @@
 """PostgreSQL database client for FlowMentor."""
 
 from typing import Optional, Any, Dict, List
-from datetime import datetime
+from datetime import datetime, date as date_cls
+import json
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy import text, select, insert, update, delete
 from sqlalchemy.orm import DeclarativeBase
@@ -178,9 +179,9 @@ class DatabaseClient:
             await session.execute(
                 text("""
                     INSERT INTO user_profiles (user_id, data, updated_at)
-                    VALUES (:user_id, :data::jsonb, CURRENT_TIMESTAMP)
+                    VALUES (:user_id, :data, CURRENT_TIMESTAMP)
                     ON CONFLICT (user_id)
-                    DO UPDATE SET data = :data::jsonb, updated_at = CURRENT_TIMESTAMP
+                    DO UPDATE SET data = :data, updated_at = CURRENT_TIMESTAMP
                 """),
                 {"user_id": user_id, "data": profile_data}
             )
@@ -205,9 +206,9 @@ class DatabaseClient:
             await session.execute(
                 text("""
                     INSERT INTO routines (routine_id, user_id, data, updated_at)
-                    VALUES (:routine_id, :user_id, :data::jsonb, CURRENT_TIMESTAMP)
+                    VALUES (:routine_id, :user_id, :data, CURRENT_TIMESTAMP)
                     ON CONFLICT (routine_id)
-                    DO UPDATE SET data = :data::jsonb, updated_at = CURRENT_TIMESTAMP
+                    DO UPDATE SET data = :data, updated_at = CURRENT_TIMESTAMP
                 """),
                 {"routine_id": routine_id, "user_id": user_id, "data": routine_data}
             )
@@ -222,7 +223,10 @@ class DatabaseClient:
                     WHERE user_id = :user_id AND date = :date
                     ORDER BY timestamp DESC
                 """),
-                {"user_id": user_id, "date": date}
+                {
+                    "user_id": user_id,
+                    "date": date_cls.fromisoformat(date) if isinstance(date, str) else date,
+                }
             )
             return [row[0] for row in result.fetchall()]
 
@@ -236,9 +240,13 @@ class DatabaseClient:
             await session.execute(
                 text("""
                     INSERT INTO checkins (user_id, date, data)
-                    VALUES (:user_id, :date, :data::jsonb)
+                    VALUES (:user_id, :date, :data)
                 """),
-                {"user_id": user_id, "date": date, "data": checkin_data}
+                {
+                    "user_id": user_id,
+                    "date": date_cls.fromisoformat(date) if isinstance(date, str) else date,
+                    "data": checkin_data,
+                }
             )
             await session.commit()
 
@@ -276,9 +284,13 @@ class DatabaseClient:
             await session.execute(
                 text("""
                     INSERT INTO reflections (user_id, date, data)
-                    VALUES (:user_id, :date, :data::jsonb)
+                    VALUES (:user_id, :date, :data)
                 """),
-                {"user_id": user_id, "date": date, "data": reflection_data}
+                {
+                    "user_id": user_id,
+                    "date": date_cls.fromisoformat(date) if isinstance(date, str) else date,
+                    "data": reflection_data,
+                }
             )
             await session.commit()
 
@@ -291,7 +303,10 @@ class DatabaseClient:
                     WHERE user_id = :user_id AND date = :date
                     ORDER BY created_at DESC
                 """),
-                {"user_id": user_id, "date": date}
+                {
+                    "user_id": user_id,
+                    "date": date_cls.fromisoformat(date) if isinstance(date, str) else date,
+                }
             )
             return [row[0] for row in result.fetchall()]
 
@@ -305,9 +320,13 @@ class DatabaseClient:
             await session.execute(
                 text("""
                     INSERT INTO ai_plans (user_id, date, data)
-                    VALUES (:user_id, :date, :data::jsonb)
+                    VALUES (:user_id, :date, :data)
                 """),
-                {"user_id": user_id, "date": date, "data": plan_data}
+                {
+                    "user_id": user_id,
+                    "date": date_cls.fromisoformat(date) if isinstance(date, str) else date,
+                    "data": plan_data,
+                }
             )
             await session.commit()
 
@@ -320,7 +339,10 @@ class DatabaseClient:
                     WHERE user_id = :user_id AND date = :date
                     ORDER BY (data->>'startTime')
                 """),
-                {"user_id": user_id, "date": date}
+                {
+                    "user_id": user_id,
+                    "date": date_cls.fromisoformat(date) if isinstance(date, str) else date,
+                }
             )
             return [row[0] for row in result.fetchall()]
 
@@ -338,14 +360,14 @@ class DatabaseClient:
             await session.execute(
                 text("""
                     INSERT INTO activities (activity_id, user_id, date, activity_type, data)
-                    VALUES (:activity_id, :user_id, :date, :activity_type, :data::jsonb)
+                    VALUES (:activity_id, :user_id, :date, :activity_type, CAST(:payload AS JSONB))
                 """),
                 {
                     "activity_id": activity_id,
                     "user_id": user_id,
-                    "date": date,
+                    "date": date_cls.fromisoformat(date) if isinstance(date, str) else date,
                     "activity_type": activity_type,
-                    "data": activity_data
+                    "payload": json.dumps(activity_data),
                 }
             )
             await session.commit()
