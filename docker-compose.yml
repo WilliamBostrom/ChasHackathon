@@ -1,0 +1,9 @@
+version: "3.8"
+
+# PostgreSQL and other services are managed by Polytope
+# Run services using: polytope run
+# This file is kept for potential future service definitions
+
+volumes:
+  postgres_data:
+    driver: local

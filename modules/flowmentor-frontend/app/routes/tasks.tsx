@@ -40,27 +40,44 @@ export default function TasksPage() {
   const loadTasks = async () => {
     try {
       const today = new Date().toISOString().split("T")[0];
+      console.log("📥 Loading tasks for date:", today);
+      console.log("🌐 API Base URL:", import.meta.env.VITE_API_BASE_URL);
+
       const data = await apiMethods.getTasks(today);
+      console.log("✅ Tasks loaded:", data);
       setTasks(data);
     } catch (error) {
-      console.error("Failed to load tasks:", error);
+      console.error("❌ Failed to load tasks:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+      }
     }
   };
 
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("🚀 Starting to add task...");
     setIsLoading(true);
 
     try {
-      const taskData: Omit<Task, "id"> = {
+      const today = new Date().toISOString().split("T")[0];
+      const taskData = {
         type: newTask.type,
         title: newTask.title,
         duration: newTask.duration ? parseInt(newTask.duration) : undefined,
         time: newTask.time || undefined,
         completed: false,
+        date: today,
       };
 
-      await apiMethods.addTask(taskData);
+      console.log("📝 Task data to send:", taskData);
+      console.log("🌐 API Base URL:", import.meta.env.VITE_API_BASE_URL);
+
+      const result = await apiMethods.addTask(taskData);
+      console.log("✅ Task added successfully:", result);
+
+      // Force reload tasks to ensure UI updates
+      console.log("🔄 Reloading tasks...");
       await loadTasks();
 
       setNewTask({
@@ -69,16 +86,25 @@ export default function TasksPage() {
         duration: "",
         time: "",
       });
+      console.log("🎉 Task form reset");
     } catch (error) {
-      console.error("Failed to add task:", error);
+      console.error("❌ Failed to add task:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+      alert("Failed to add task. Please try again.");
     } finally {
       setIsLoading(false);
+      console.log("🏁 Task addition process completed");
     }
   };
 
   const handleToggleComplete = async (task: Task) => {
     try {
-      await apiMethods.updateTask(task.id, { completed: !task.completed });
+      await apiMethods.updateTask(task.id, {
+        completed: !task.completed,
+      });
       await loadTasks();
     } catch (error) {
       console.error("Failed to update task:", error);

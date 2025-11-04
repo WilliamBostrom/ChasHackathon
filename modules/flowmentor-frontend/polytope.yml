@@ -10,7 +10,7 @@ tools:
         type: [default, str, http://localhost:3030]
       - id: port
         info: The port on which the service will be exposed.
-        type: [default, int, 51732]
+        type: [default, int, 5173]
       - id: restart-policy
         info: Restart policy for the container.
         type: [default, [enum, always, on-failure], always]
@@ -40,9 +40,33 @@ tools:
             - { name: VITE_API_BASE_URL, value: pt.param api-base-url }
             - { name: LOG_LEVEL, value: INFO }
           mounts:
-            - { path: /root/.cache/, source: { type: volume, scope: project, id: flowmentor-frontend-home-cache }}
-            - { path: /root/.bun/, source: { type: volume, scope: project, id: flowmentor-frontend-bun-cache }}
-            - { path: /app/node_modules/, source: { type: volume, scope: project, id: flowmentor-frontend-node-modules }}
+            - {
+                path: /root/.cache/,
+                source:
+                  {
+                    type: volume,
+                    scope: project,
+                    id: flowmentor-frontend-home-cache,
+                  },
+              }
+            - {
+                path: /root/.bun/,
+                source:
+                  {
+                    type: volume,
+                    scope: project,
+                    id: flowmentor-frontend-bun-cache,
+                  },
+              }
+            - {
+                path: /app/node_modules/,
+                source:
+                  {
+                    type: volume,
+                    scope: project,
+                    id: flowmentor-frontend-node-modules,
+                  },
+              }
   flowmentor-frontend-add:
     info: Adds one or more packages to the package.json file.
     params:

@@ -30,16 +30,15 @@ async def lifespan(app: FastAPI):
         await app.state.twilio_client.initialize()
         await app.state.twilio_client.init_connection()
 
-    # Initialize Couchbase client if enabled
-    if conf.USE_COUCHBASE:
-        from .clients.couchbase import CouchbaseClient
+    # Initialize PostgreSQL database client if enabled
+    if conf.USE_DATABASE:
+        from .clients.database import DatabaseClient
 
-        couchbase_config = conf.get_couchbase_conf()
-        app.state.couchbase_client = CouchbaseClient(couchbase_config)
-        await app.state.couchbase_client.initialize()
-        await app.state.couchbase_client.init_connection()
-        # Create indexes for efficient querying
-        await app.state.couchbase_client.create_indexes()
+        database_config = conf.get_database_conf()
+        app.state.db_client = DatabaseClient(database_config)
+        await app.state.db_client.initialize()
+        # Create tables for efficient querying
+        await app.state.db_client.create_tables()
 
     # Initialize all registered components
     await init(app)
@@ -53,9 +52,9 @@ async def lifespan(app: FastAPI):
     if conf.USE_TWILIO:
         await app.state.twilio_client.close()
 
-    # Clean up Couchbase client if enabled
-    if conf.USE_COUCHBASE:
-        await app.state.couchbase_client.close()
+    # Clean up database client if enabled
+    if conf.USE_DATABASE:
+        await app.state.db_client.close()
 
 
 app = FastAPI(

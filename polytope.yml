@@ -2,14 +2,14 @@ include:
   - repo: gh:bluetext-io/bluetext
   - modules/flowmentor-api
   - modules/config-manager
-  - modules/couchbase
   - modules/flowmentor-frontend
   - modules/temporal
+  - modules/postgres
 tools:
   default:
     run:
-      - tool: "flowmentor-api"
-      - tool: "couchbase"
-      - tool: "flowmentor-frontend"
+      - tool: "postgres"
       - tool: "temporal"
       - tool: "temporal-ui"
+      - tool: "flowmentor-api"
+      - tool: "flowmentor-frontend"

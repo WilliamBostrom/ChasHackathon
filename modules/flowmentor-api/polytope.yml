@@ -40,15 +40,37 @@ tools:
             - { name: HTTP_PORT, value: pt.param port }
             - { name: LOG_LEVEL, value: INFO }
 
-            - { name: POSTGRES_HOST, value: postgres }
+            # PostgreSQL Database Configuration
+            - { name: DATABASE_HOST, value: postgres }
+            - { name: DATABASE_PORT, value: 5432 }
+            - { name: DATABASE_NAME, value: flowmentor }
+            - { name: DATABASE_USERNAME, value: postgres }
+            - { name: DATABASE_PASSWORD, value: password }
 
+            # Temporal Configuration
             - { name: TEMPORAL_HOST, value: temporal }
             - { name: TEMPORAL_PORT, value: 7233 }
             - { name: TEMPORAL_NAMESPACE, value: default }
             - { name: TEMPORAL_TASK_QUEUE, value: main-task-queue }
           mounts:
-            - { path: /root/.cache/, source: { type: volume, scope: project, id: flowmentor-api-dependency-cache } }
-            - { path: /lib/py, source: { type: repo, path: /lib/py, repo: "#pt-clj pt/module-project-ref" } }
+            - {
+                path: /root/.cache/,
+                source:
+                  {
+                    type: volume,
+                    scope: project,
+                    id: flowmentor-api-dependency-cache,
+                  },
+              }
+            - {
+                path: /lib/py,
+                source:
+                  {
+                    type: repo,
+                    path: /lib/py,
+                    repo: "#pt-clj pt/module-project-ref",
+                  },
+              }
   flowmentor-api-add:
     info: Adds one or more packages to the pyproject.toml file.
     params:
@@ -72,10 +94,20 @@ tools:
         id: add-couchbase-scripts
         args:
           actions:
-            - template: {type: repo, repo: "bluetext-io/bluetext", path: /templates/lib/py/couchbase-client}
+            - template:
+                {
+                  type: repo,
+                  repo: "bluetext-io/bluetext",
+                  path: /templates/lib/py/couchbase-client,
+                }
               path: /lib/py/couchbase-client
               on-conflict: skip
-            - template: {type: repo, repo: "bluetext-io/bluetext", path: /templates/api/bin/add-couchbase-collection}
+            - template:
+                {
+                  type: repo,
+                  repo: "bluetext-io/bluetext",
+                  path: /templates/api/bin/add-couchbase-collection,
+                }
               path: /modules/api/bin/add-couchbase-collection
               on-conflict: skip
       - tool: flowmentor-api
@@ -87,7 +119,7 @@ tools:
           restart-policy: never
 
   flowmentor-api-add-temporal-client:
-    info: Adds Temporal client library with workflow orchestration support and registers add-temporal-workflow tool to polytope.yml. 
+    info: Adds Temporal client library with workflow orchestration support and registers add-temporal-workflow tool to polytope.yml.
     params: []
     await: [add-temporal-scripts, add-temporal-client]
     run:
@@ -95,10 +127,20 @@ tools:
         id: add-temporal-scripts
         args:
           actions:
-            - template: {type: repo, repo: "bluetext-io/bluetext", path: /templates/lib/py/temporal-client}
+            - template:
+                {
+                  type: repo,
+                  repo: "bluetext-io/bluetext",
+                  path: /templates/lib/py/temporal-client,
+                }
               path: /lib/py/temporal-client
               on-conflict: skip
-            - template: {type: repo, repo: "bluetext-io/bluetext", path: /templates/api/bin/add-temporal-workflow}
+            - template:
+                {
+                  type: repo,
+                  repo: "bluetext-io/bluetext",
+                  path: /templates/api/bin/add-temporal-workflow,
+                }
               path: /modules/api/bin/add-temporal-workflow
               on-conflict: skip
 

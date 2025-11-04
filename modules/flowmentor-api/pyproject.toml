@@ -3,7 +3,8 @@ name = "backend"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-    "couchbase>=4.3.0",
+    "asyncpg>=0.29.0",
+    "sqlalchemy[asyncio]>=2.0.0",
     "fastapi[standard-no-fastapi-cloud-cli]==0.116.1",
     "pyjwt[cryptography]>=2.10.1",
     "temporal-client",
@@ -24,4 +25,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.uv.sources]
-temporal-client = { path = "../../lib/py/temporal-client", editable = true }
+temporal-client = { path = "/lib/py/temporal-client", editable = true }

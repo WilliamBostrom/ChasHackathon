@@ -12,8 +12,8 @@ USE_AUTH = False
 # Set to True to enable Twilio SMS functionality
 USE_TWILIO = False
 
-# Set to True to enable Couchbase
-USE_COUCHBASE = False
+# Set to True to enable database
+USE_DATABASE = True
 
 #### Types ####
 
@@ -64,19 +64,19 @@ TWILIO_AUTH_TOKEN = EnvVarSpec(id="TWILIO_AUTH_TOKEN", is_optional=True, is_secr
 
 TWILIO_FROM_PHONE_NUMBER = EnvVarSpec(id="TWILIO_FROM_PHONE_NUMBER", is_optional=True)
 
-## Couchbase ##
+## PostgreSQL Database ##
 
-COUCHBASE_CONNECTION_STRING = EnvVarSpec(
-    id="COUCHBASE_CONNECTION_STRING", default="couchbase://couchbase"
+DATABASE_HOST = EnvVarSpec(id="DATABASE_HOST", default="localhost")
+
+DATABASE_PORT = EnvVarSpec(id="DATABASE_PORT", default="5432")
+
+DATABASE_NAME = EnvVarSpec(id="DATABASE_NAME", default="flowmentor")
+
+DATABASE_USERNAME = EnvVarSpec(id="DATABASE_USERNAME", default="postgres")
+
+DATABASE_PASSWORD = EnvVarSpec(
+    id="DATABASE_PASSWORD", default="password", is_secret=True
 )
-
-COUCHBASE_USERNAME = EnvVarSpec(id="COUCHBASE_USERNAME", default="Administrator")
-
-COUCHBASE_PASSWORD = EnvVarSpec(
-    id="COUCHBASE_PASSWORD", default="password", is_secret=True
-)
-
-COUCHBASE_BUCKET = EnvVarSpec(id="COUCHBASE_BUCKET", default="flowmentor")
 
 #### Validation ####
 VALIDATED_ENV_VARS = [
@@ -109,14 +109,15 @@ if USE_TWILIO:
         ]
     )
 
-# Only validate Couchbase vars if USE_COUCHBASE is True
-if USE_COUCHBASE:
+# Only validate database vars if USE_DATABASE is True
+if USE_DATABASE:
     VALIDATED_ENV_VARS.extend(
         [
-            COUCHBASE_CONNECTION_STRING,
-            COUCHBASE_USERNAME,
-            COUCHBASE_PASSWORD,
-            COUCHBASE_BUCKET,
+            DATABASE_HOST,
+            DATABASE_PORT,
+            DATABASE_NAME,
+            DATABASE_USERNAME,
+            DATABASE_PASSWORD,
         ]
     )
 
@@ -165,14 +166,15 @@ def get_twilio_conf():
     )
 
 
-def get_couchbase_conf():
-    """Get Couchbase configuration."""
+def get_database_conf():
+    """Get PostgreSQL database configuration."""
     # Import here to avoid circular dependency
-    from ..clients.couchbase import CouchbaseConf
+    from ..clients.database import DatabaseConf
 
-    return CouchbaseConf(
-        connection_string=env.parse(COUCHBASE_CONNECTION_STRING),
-        username=env.parse(COUCHBASE_USERNAME),
-        password=env.parse(COUCHBASE_PASSWORD),
-        bucket_name=env.parse(COUCHBASE_BUCKET),
+    return DatabaseConf(
+        host=env.parse(DATABASE_HOST),
+        port=int(env.parse(DATABASE_PORT)),
+        database=env.parse(DATABASE_NAME),
+        username=env.parse(DATABASE_USERNAME),
+        password=env.parse(DATABASE_PASSWORD),
     )

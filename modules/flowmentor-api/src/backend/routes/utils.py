@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from ..utils import auth, log
 from .. import conf
+from ..clients.database import DatabaseClient
 
 logger = log.get_logger(__name__)
 
@@ -68,29 +69,28 @@ RequestPrincipal = Annotated[PrincipalInfo, Depends(get_request_principal)]
 #
 # UserRequestPrincipal = Annotated[PrincipalInfo, Depends(get_user_request_principal)]
 
-#### Couchbase ####
+#### Database ####
 
 
-def get_couchbase_client(request: Request):
+def get_database_client(request: Request):
     """
-    FastAPI dependency that provides the Couchbase client.
+    FastAPI dependency that provides the PostgreSQL database client.
 
     Usage in routes:
-        from .utils import CouchbaseDB
+        from .utils import DatabaseDB
 
         @router.post("/users")
-        async def create_user(user: User, cb: CouchbaseDB):
-            keyspace = cb.get_keyspace("users")
-            return await cb.insert_document(keyspace, user.dict())
+        async def create_user(user: User, db: DatabaseDB):
+            await db.upsert_user_profile(user_id, user.dict())
     """
-    if not hasattr(request.app.state, "couchbase_client"):
+    if not hasattr(request.app.state, "db_client"):
         raise HTTPException(
             status_code=503,
-            detail="Couchbase client is not configured. Run add-couchbase-client to set up Couchbase",
+            detail="Database client is not configured.",
         )
 
-    return request.app.state.couchbase_client
+    return request.app.state.db_client
 
 
 # Type alias for dependency injection
-CouchbaseDB = Annotated["CouchbaseClient", Depends(get_couchbase_client)]
+DatabaseDB = Annotated["DatabaseClient", Depends(get_database_client)]

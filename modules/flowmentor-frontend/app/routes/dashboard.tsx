@@ -191,6 +191,7 @@ export default function DashboardPage() {
   const handleToggleComplete = async (task: Task) => {
     try {
       await apiMethods.updateTask(task.id, { completed: !task.completed });
+      // Force reload both tasks and calendar events
       await loadTodayData();
       await loadCalendarEvents();
     } catch (error) {
@@ -203,15 +204,19 @@ export default function DashboardPage() {
     setIsLoading(true);
 
     try {
-      const taskData: Omit<Task, "id"> = {
+      const today = format(new Date(), "yyyy-MM-dd");
+      const taskData = {
         type: newTask.type,
         title: newTask.title,
         duration: newTask.duration ? parseInt(newTask.duration) : undefined,
         time: newTask.time || undefined,
         completed: false,
+        date: newTask.date || today,
       };
 
       await apiMethods.addTask(taskData);
+
+      // Force reload both tasks and calendar events
       await loadTodayData();
       await loadCalendarEvents();
 
@@ -221,11 +226,12 @@ export default function DashboardPage() {
         description: "",
         duration: "",
         time: "",
-        date: format(new Date(), "yyyy-MM-dd"),
+        date: today,
       });
       setIsTaskModalOpen(false);
     } catch (error) {
       console.error("Failed to add task:", error);
+      alert("Failed to add task. Please try again.");
     } finally {
       setIsLoading(false);
     }
