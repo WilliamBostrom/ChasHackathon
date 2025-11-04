@@ -31,27 +31,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
-        {/* Theme detection script - runs before React hydration */}
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              // Apply theme based on system preference
-              const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-              if (prefersDark) {
-                document.documentElement.classList.add('dark');
-              }
-
-              // Listen for theme changes
-              window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-                if (e.matches) {
-                  document.documentElement.classList.add('dark');
-                } else {
-                  document.documentElement.classList.remove('dark');
-                }
-              });
-            })();
-          `
-        }} />
       </head>
       <body>
         {children}

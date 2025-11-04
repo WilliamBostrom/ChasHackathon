@@ -7,7 +7,15 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Button } from "~/components/ui/button";
-import { Sunrise, Target, Brain, TrendingUp } from "lucide-react";
+import {
+  Sunrise,
+  Target,
+  Brain,
+  TrendingUp,
+  ListTodo,
+  Calendar,
+} from "lucide-react";
+import Header from "~/components/Header";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -17,26 +25,31 @@ export default function Home() {
       icon: <Sunrise className="h-12 w-12 text-blue-500" />,
       title: "Morning Check-In",
       description: "Start your day with intention and clarity",
+      route: "/morning",
     },
     {
-      icon: <Target className="h-12 w-12 text-purple-500" />,
+      icon: <ListTodo className="h-12 w-12 text-purple-500" />,
       title: "Smart Task Planning",
       description: "Add tasks, gym sessions, and meetings effortlessly",
+      route: "/tasks",
     },
     {
-      icon: <Brain className="h-12 w-12 text-green-500" />,
+      icon: <Calendar className="h-12 w-12 text-green-500" />,
       title: "AI Day Planning",
       description: "Get personalized focus blocks optimized by AI",
+      route: "/plan",
     },
     {
       icon: <TrendingUp className="h-12 w-12 text-orange-500" />,
       title: "Weekly Insights",
       description: "Track progress and get micro-goals for growth",
+      route: "/weekly",
     },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      <Header />
       <div className="container mx-auto px-6 py-12">
         <div className="text-center mb-16">
           <h1 className="text-6xl font-bold text-gray-800 mb-4">
@@ -58,7 +71,8 @@ export default function Home() {
           {features.map((feature, index) => (
             <Card
               key={index}
-              className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+              onClick={() => navigate(feature.route)}
             >
               <CardHeader className="text-center">
                 <div className="flex justify-center mb-4">{feature.icon}</div>

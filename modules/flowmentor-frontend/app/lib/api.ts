@@ -1,11 +1,12 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3030';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3030";
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -18,7 +19,7 @@ export interface MorningCheckIn {
 
 export interface Task {
   id: string;
-  type: 'todo' | 'gym' | 'meeting';
+  type: "todo" | "gym" | "meeting";
   title: string;
   duration?: number;
   time?: string;
@@ -31,7 +32,7 @@ export interface FocusBlock {
   startTime: string;
   endTime: string;
   duration: number;
-  type: 'focus' | 'break' | 'routine';
+  type: "focus" | "break" | "routine";
 }
 
 export interface DayPlan {
@@ -66,13 +67,13 @@ export interface WeeklySummary {
 export const apiMethods = {
   // Morning
   submitMorningCheckIn: async (data: MorningCheckIn) => {
-    const response = await api.post('/morning-checkin', data);
+    const response = await api.post("/morning-checkin", data);
     return response.data;
   },
 
   // Tasks
-  addTask: async (task: Omit<Task, 'id'>) => {
-    const response = await api.post('/tasks', task);
+  addTask: async (task: Omit<Task, "id">) => {
+    const response = await api.post("/tasks", task);
     return response.data;
   },
 
@@ -92,7 +93,7 @@ export const apiMethods = {
 
   // AI Plan
   generateDayPlan: async (date: string) => {
-    const response = await api.post('/generate-plan', { date });
+    const response = await api.post("/generate-plan", { date });
     return response.data;
   },
 
@@ -114,7 +115,7 @@ export const apiMethods = {
 
   // Afternoon
   submitAfternoonReflection: async (data: AfternoonReflection) => {
-    const response = await api.post('/afternoon-reflection', data);
+    const response = await api.post("/afternoon-reflection", data);
     return response.data;
   },
 
@@ -130,7 +131,7 @@ export const apiMethods = {
   },
 
   selectMicroGoal: async (goalId: string) => {
-    const response = await api.post('/micro-goal/select', { goalId });
+    const response = await api.post("/micro-goal/select", { goalId });
     return response.data;
   },
 };

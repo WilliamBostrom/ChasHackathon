@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import Header from "~/components/Header";
 import {
   Card,
   CardContent,
@@ -37,56 +38,59 @@ export default function MorningCheckIn() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl shadow-xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-gray-800">
-            Good Morning! ☀️
-          </CardTitle>
-          <CardDescription className="text-lg mt-2">
-            Let's start your day with intention
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="feeling" className="text-lg font-semibold">
-                How do you feel today?
-              </Label>
-              <Textarea
-                id="feeling"
-                placeholder="I feel energized and ready to tackle my goals..."
-                value={feeling}
-                onChange={(e) => setFeeling(e.target.value)}
-                className="min-h-[120px] resize-none"
-                required
-              />
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Header />
+      <div className="flex items-center justify-center p-4">
+        <Card className="w-full max-w-2xl shadow-xl">
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl font-bold text-gray-800">
+              Good Morning! ☀️
+            </CardTitle>
+            <CardDescription className="text-lg mt-2">
+              Let's start your day with intention
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="feeling" className="text-lg font-semibold">
+                  How do you feel today?
+                </Label>
+                <Textarea
+                  id="feeling"
+                  placeholder="I feel energized and ready to tackle my goals..."
+                  value={feeling}
+                  onChange={(e) => setFeeling(e.target.value)}
+                  className="min-h-[120px] resize-none"
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="focus" className="text-lg font-semibold">
-                What will you focus on today?
-              </Label>
-              <Textarea
-                id="focus"
-                placeholder="Today I will focus on completing the presentation and exercising..."
-                value={focus}
-                onChange={(e) => setFocus(e.target.value)}
-                className="min-h-[120px] resize-none"
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="focus" className="text-lg font-semibold">
+                  What will you focus on today?
+                </Label>
+                <Textarea
+                  id="focus"
+                  placeholder="Today I will focus on completing the presentation and exercising..."
+                  value={focus}
+                  onChange={(e) => setFocus(e.target.value)}
+                  className="min-h-[120px] resize-none"
+                  required
+                />
+              </div>
 
-            <Button
-              type="submit"
-              className="w-full text-lg py-6"
-              disabled={isSubmitting || !feeling.trim() || !focus.trim()}
-            >
-              {isSubmitting ? "Starting Your Day..." : "Let's Begin! 🚀"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+              <Button
+                type="submit"
+                className="w-full text-lg py-6"
+                disabled={isSubmitting || !feeling.trim() || !focus.trim()}
+              >
+                {isSubmitting ? "Starting Your Day..." : "Let's Begin! 🚀"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
