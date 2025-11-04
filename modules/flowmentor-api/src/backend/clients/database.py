@@ -372,6 +372,59 @@ class DatabaseClient:
             )
             await session.commit()
 
+    async def update_activity(
+        self,
+        user_id: str,
+        date: str,
+        task_id: str,
+        full_data: Dict[str, Any],
+    ) -> None:
+        """Update an existing activity by activity_id replacing JSON data payload."""
+        async with self.get_session() as session:
+            await session.execute(
+                text(
+                    """
+                    UPDATE activities
+                    SET data = CAST(:payload AS JSONB)
+                    WHERE (data->>'id') = :task_id
+                      AND user_id = :user_id
+                      AND date = :date
+                    """
+                ),
+                {
+                    "payload": json.dumps(full_data),
+                    "task_id": task_id,
+                    "user_id": user_id,
+                    "date": date_cls.fromisoformat(date) if isinstance(date, str) else date,
+                },
+            )
+            await session.commit()
+
+    async def delete_activity(
+        self,
+        user_id: str,
+        date: str,
+        task_id: str,
+    ) -> None:
+        """Delete an activity row matching the JSON payload id for given user/date."""
+        async with self.get_session() as session:
+            await session.execute(
+                text(
+                    """
+                    DELETE FROM activities
+                    WHERE (data->>'id') = :task_id
+                      AND user_id = :user_id
+                      AND date = :date
+                    """
+                ),
+                {
+                    "task_id": task_id,
+                    "user_id": user_id,
+                    "date": date_cls.fromisoformat(date) if isinstance(date, str) else date,
+                },
+            )
+            await session.commit()
+
     async def close(self) -> None:
         """Close the database connection."""
         if self.engine:

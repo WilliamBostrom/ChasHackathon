@@ -151,18 +151,24 @@ async def update_task(request: Request, task_id: str, updates: dict):
     try:
         db_client = request.app.state.db_client
         date = updates.get("date", time.strftime("%Y-%m-%d"))
-        
-        # Get existing activities to find and update the task
+
+        # Fetch existing activities for the date and find the current task payload
         activities = await db_client.get_activities(DEFAULT_USER_ID, date)
-        
-        for activity in activities:
-            if activity.get("id") == task_id:
-                # Update the activity
-                activity.update(updates)
-                await db_client.insert_activity(DEFAULT_USER_ID, date, activity.get("type", "task"), activity)
-                break
-        
-        return {"id": task_id, **updates}
+        current = next((a for a in activities if a.get("id") == task_id), None)
+        if not current:
+            # If not found, return 404-like error
+            raise HTTPException(status_code=404, detail="Task not found")
+
+        # Merge updates onto the existing JSON payload
+        merged = {**current, **updates}
+        # Ensure id and type are preserved
+        merged["id"] = task_id
+        if "type" not in merged:
+            merged["type"] = current.get("type", "task")
+
+        await db_client.update_activity(DEFAULT_USER_ID, date, task_id, merged)
+
+        return {"id": task_id, **merged}
     except Exception as e:
         logger.error(f"Error updating task: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -173,10 +179,12 @@ async def delete_task(request: Request, task_id: str):
     """Delete a task."""
     if not conf.USE_DATABASE:
         return {"success": True}
-    
+
     try:
-        # Note: Database client doesn't have a delete activity method yet
-        # For now, just return success
+        db_client = request.app.state.db_client
+        # We operate on today's list (UI shows today's tasks)
+        date = time.strftime("%Y-%m-%d")
+        await db_client.delete_activity(DEFAULT_USER_ID, date, task_id)
         return {"success": True}
     except Exception as e:
         logger.error(f"Error deleting task: {e}")
