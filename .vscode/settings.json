@@ -1,0 +1,9 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/modules/flowmentor-api/.venv/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/modules/flowmentor-api/src"
+  ],
+  "python.analysis.autoSearchPaths": true,
+  "python.analysis.useLibraryCodeForTypes": true,
+  "python.terminal.activateEnvironment": true
+}
